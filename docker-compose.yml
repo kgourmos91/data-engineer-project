@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: datapipeline
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  etl:
+    build: ./etl
+    depends_on:
+      - postgres
+
+  mongodb:
+    image: mongo:4.4
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+  ingestion-api:
+    build: ./ingestion-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - mongodb
+
+volumes:
+  pgdata:
+  mongodata:
